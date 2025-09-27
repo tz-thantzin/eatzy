@@ -1,0 +1,234 @@
+import 'dart:convert';
+import 'dart:developer';
+import 'dart:io';
+import 'dart:typed_data';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
+import 'package:flutter_image_compress/flutter_image_compress.dart';
+
+import '../../domain/entities/user.dart' as user_entity;
+import '../constants.dart';
+
+class UserProfileDatasource {
+  final FirebaseFirestore _firestore;
+  final firebase_auth.FirebaseAuth _firebaseAuth;
+
+  UserProfileDatasource({
+    FirebaseFirestore? firestore,
+    firebase_auth.FirebaseAuth? firebaseAuth,
+  }) : _firestore = firestore ?? FirebaseFirestore.instance,
+       _firebaseAuth = firebaseAuth ?? firebase_auth.FirebaseAuth.instance;
+
+  Future<void> saveUserProfile({
+    required String uid,
+    required String fullName,
+    required String email,
+    required String? imagePath,
+    required DateTime? dob,
+    required String? gender,
+  }) async {
+    String? base64Image;
+    if (imagePath != null) {
+      final File file = File(imagePath);
+
+      if (!file.existsSync()) {
+        throw Exception('storage_error_file_not_found');
+      }
+
+      // Compress and check null
+      final Uint8List? compressedBytes =
+          await FlutterImageCompress.compressWithFile(
+            imagePath,
+            quality: 30, // tweak for size/quality balance
+          );
+
+      if (compressedBytes == null) {
+        throw Exception('storage_error_image_compression_failed');
+      }
+
+      // Encode as Base64
+      base64Image = base64Encode(compressedBytes);
+
+      // Optional: size check before sending to Firestore
+      final double sizeKB = base64Image.length * 3 / 4 / 1024;
+      if (sizeKB > 900) {
+        throw Exception('storage_error_image_too_large');
+      }
+    }
+
+    log('base64Image ${base64Image}');
+    final DocumentReference<Map<String, dynamic>> userRef = _firestore
+        .collection('users')
+        .doc(uid);
+    final DocumentSnapshot<Map<String, dynamic>> doc = await userRef.get();
+    final bool isNewUser = !doc.exists;
+    await userRef.set(<String, dynamic>{
+      UserFields.fullName: fullName,
+      UserFields.email: email,
+      UserFields.dob: dob?.toIso8601String(),
+      UserFields.gender: gender,
+      UserFields.updatedAt: FieldValue.serverTimestamp(),
+      UserFields.lastLogin: FieldValue.serverTimestamp(),
+      if (isNewUser) UserFields.createdAt: FieldValue.serverTimestamp(),
+      if (base64Image != null) UserFields.imageBase64: base64Image,
+    }, SetOptions(merge: true));
+  }
+
+  Future<user_entity.User> getUserProfile({
+    required String uid,
+    required String email,
+  }) async {
+    final DocumentReference<Map<String, dynamic>> userRef = _firestore
+        .collection('users')
+        .doc(uid);
+    final DocumentSnapshot<Map<String, dynamic>> snapshot = await userRef.get();
+    final firebase_auth.User? currentUser = _firebaseAuth.currentUser;
+
+    if (!snapshot.exists) {
+      return user_entity.User(
+        uid: uid,
+        email: email,
+        lastLogin: currentUser?.metadata.lastSignInTime,
+        isEmailVerified: currentUser?.emailVerified ?? false,
+      );
+    }
+
+    await userRef.set(<String, dynamic>{
+      UserFields.lastLogin: FieldValue.serverTimestamp(),
+    }, SetOptions(merge: true));
+
+    final Map<String, dynamic> data = snapshot.data() ?? <String, dynamic>{};
+    final String? base64Image = data[UserFields.imageBase64] is String
+        ? data[UserFields.imageBase64] as String
+        : null;
+
+    return user_entity.User(
+      uid: uid,
+      name: data[UserFields.fullName] ?? '',
+      email: data[UserFields.email] ?? '',
+      dob: data[UserFields.dob] != null
+          ? DateTime.tryParse(data[UserFields.dob])
+          : null,
+      gender: data[UserFields.gender],
+      imageBytes: base64Image != null ? base64Decode(base64Image) : null,
+      isUserProfileExist: true,
+      lastLogin: currentUser?.metadata.lastSignInTime,
+      isEmailVerified: currentUser?.emailVerified ?? false,
+    );
+  }
+
+  Future<user_entity.Users> getLastActiveUsersByPagination({
+    required int limit,
+    DocumentSnapshot<Map<String, dynamic>>? lastDocument,
+  }) async {
+    final String? currentUserUid = _firebaseAuth.currentUser?.uid;
+    if (currentUserUid == null) {
+      throw Exception('error_not_signed_in');
+    }
+
+    final DateTime oneDayAgo = DateTime.now().subtract(const Duration(days: 1));
+
+    Query<Map<String, dynamic>> query = _firestore
+        .collection('users')
+        .where(
+          UserFields.lastLogin,
+          isGreaterThanOrEqualTo: Timestamp.fromDate(oneDayAgo),
+        )
+        .orderBy(UserFields.lastLogin, descending: true) // order by lastLogin
+        .limit(limit);
+
+    if (lastDocument != null) {
+      query = query.startAfterDocument(lastDocument);
+    }
+
+    final QuerySnapshot<Map<String, dynamic>> snapshot = await query.get();
+
+    final List<user_entity.User> users = snapshot.docs
+        .where(
+          (QueryDocumentSnapshot<Map<String, dynamic>> doc) =>
+              doc.id != currentUserUid,
+        )
+        .map((QueryDocumentSnapshot<Map<String, dynamic>> doc) {
+          final Map<String, dynamic> data = doc.data();
+
+          final String? base64Image = data[UserFields.imageBase64] is String
+              ? data[UserFields.imageBase64] as String
+              : null;
+
+          return user_entity.User(
+            uid: doc.id,
+            name: data[UserFields.fullName] ?? '',
+            email: data[UserFields.email] ?? '',
+            dob: data[UserFields.dob] != null
+                ? DateTime.tryParse(data[UserFields.dob])
+                : null,
+            gender: data[UserFields.gender],
+            imageBytes: base64Image != null ? base64Decode(base64Image) : null,
+            lastLogin: data[UserFields.lastLogin] != null
+                ? (data[UserFields.lastLogin] as Timestamp).toDate()
+                : null,
+          );
+        })
+        .toList();
+
+    final DocumentSnapshot<Map<String, dynamic>>? newLastDoc =
+        snapshot.docs.isNotEmpty ? snapshot.docs.last : null;
+
+    return user_entity.Users(users: users, lastDocument: newLastDoc);
+  }
+
+  Future<user_entity.Users> getUsersByPagination({
+    required int limit,
+    DocumentSnapshot<Map<String, dynamic>>? lastDocument,
+  }) async {
+    final String? currentUserUid = _firebaseAuth.currentUser?.uid;
+    if (currentUserUid == null) {
+      throw Exception('error_not_signed_in');
+    }
+
+    Query<Map<String, dynamic>> query = _firestore
+        .collection('users')
+        .orderBy(UserFields.fullName)
+        .limit(limit);
+
+    if (lastDocument != null) {
+      query = query.startAfterDocument(lastDocument);
+    }
+
+    final QuerySnapshot<Map<String, dynamic>> snapshot = await query.get();
+
+    final List<user_entity.User> users = snapshot.docs
+        .where(
+          (QueryDocumentSnapshot<Map<String, dynamic>> doc) =>
+              doc.id != currentUserUid,
+        )
+        .map((QueryDocumentSnapshot<Map<String, dynamic>> doc) {
+          final Map<String, dynamic> data = doc.data();
+
+          final String? base64Image = data[UserFields.imageBase64] is String
+              ? data[UserFields.imageBase64] as String
+              : null;
+
+          return user_entity.User(
+            uid: doc.id,
+            name: data[UserFields.fullName] ?? '',
+            email: data[UserFields.email] ?? '',
+            dob: data[UserFields.dob] != null
+                ? DateTime.tryParse(data[UserFields.dob])
+                : null,
+            gender: data[UserFields.gender],
+            imageBytes: base64Image != null ? base64Decode(base64Image) : null,
+            lastLogin: data[UserFields.lastLogin] != null
+                ? (data[UserFields.lastLogin] as Timestamp).toDate()
+                : null,
+          );
+        })
+        .toList();
+
+    final DocumentSnapshot<Map<String, dynamic>>? newLastDoc =
+        snapshot.docs.isNotEmpty ? snapshot.docs.last : null;
+
+    return user_entity.Users(users: users, lastDocument: newLastDoc);
+  }
+}
