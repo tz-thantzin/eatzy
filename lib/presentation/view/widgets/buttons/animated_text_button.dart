@@ -1,12 +1,9 @@
+import 'package:eatzy/utils/extensions/extensions.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:portfolio/presentations/configs/duration.dart';
-import 'package:portfolio/utils/extensions/layout_adapter_ex.dart';
-import 'package:portfolio/utils/extensions/theme_ex.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:google_fonts/google_fonts.dart';
 
-import '../../presentations/configs/constant_colors.dart';
-import '../../presentations/configs/constant_images.dart';
-import '../../presentations/configs/constant_sizes.dart';
+import '../../../configs/configs.dart';
 
 class AnimatedTextButton extends StatefulWidget {
   final String title;
@@ -15,14 +12,18 @@ class AnimatedTextButton extends StatefulWidget {
   final Color textColor;
   final double fontSize;
   final bool isLoading;
+  final Widget? prefixIcon;
+  final Widget? suffixIcon;
 
   const AnimatedTextButton(
     this.title, {
     this.onPressed,
-    this.hoverColor = kIndigo,
-    this.textColor = kWhite,
+    this.hoverColor = kLightYellow,
+    this.textColor = kPrimaryOrange,
     this.isLoading = false,
     this.fontSize = s10,
+    this.prefixIcon,
+    this.suffixIcon,
     super.key,
   });
 
@@ -34,16 +35,22 @@ class _AnimatedTextButtonState extends State<AnimatedTextButton>
     with SingleTickerProviderStateMixin {
   bool _isButtonHovered = false;
   late AnimationController _controller;
-  late Animation<Offset> _arrowOffset;
+  late Animation<Offset> _prefixOffset;
+  late Animation<Offset> _suffixOffset;
 
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(vsync: this, duration: duration300);
 
-    _arrowOffset = Tween<Offset>(
+    _prefixOffset = Tween<Offset>(
       begin: Offset.zero,
-      end: const Offset(0.2, 0), // slide arrow slightly right
+      end: const Offset(-s03, 0), // slide arrow slightly left
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+
+    _suffixOffset = Tween<Offset>(
+      begin: Offset.zero,
+      end: const Offset(s03, 0), // slide arrow slightly right
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
@@ -84,34 +91,47 @@ class _AnimatedTextButtonState extends State<AnimatedTextButton>
                 SizedBox(
                   width: context.autoAdaptive(s14),
                   height: context.autoAdaptive(s14),
-                  child: const CircularProgressIndicator(
-                    strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(kIndigo),
+                  child: SizedBox(
+                    width: context.autoAdaptive(s14),
+                    height: context.autoAdaptive(s14),
+                    child: SpinKitWanderingCubes(
+                      color: kPrimaryOrange,
+                      size: 16.0,
+                    ),
                   ),
                 )
               else ...[
+                if (widget.prefixIcon != null) ...{
+                  SlideTransition(
+                    position: _prefixOffset,
+                    child: IconTheme(
+                      data: IconThemeData(color: effectiveColor),
+                      child: widget.prefixIcon!,
+                    ),
+                  ),
+                  horizontalSpaceTiny,
+                },
                 AnimatedDefaultTextStyle(
                   duration: duration300,
                   curve: Curves.easeInOut,
-                  style: context.labelLarge.copyWith(
-                    fontSize: context.autoAdaptive(widget.fontSize),
-                    color: effectiveColor,
+                  style: GoogleFonts.leagueSpartan(
+                    textStyle: context.labelLarge.copyWith(
+                      color: effectiveColor,
+                      fontWeight: semiBold,
+                    ),
                   ),
                   child: Text(widget.title),
                 ),
-                horizontalSpaceTiny,
-                SlideTransition(
-                  position: _arrowOffset,
-                  child: SvgPicture.asset(
-                    kRightArrowSVG,
-                    height: context.autoAdaptive(s14),
-                    width: context.autoAdaptive(s14),
-                    colorFilter: ColorFilter.mode(
-                      effectiveColor,
-                      BlendMode.srcIn,
+                if (widget.suffixIcon != null) ...{
+                  horizontalSpaceTiny,
+                  SlideTransition(
+                    position: _suffixOffset,
+                    child: IconTheme(
+                      data: IconThemeData(color: effectiveColor),
+                      child: widget.suffixIcon!,
                     ),
                   ),
-                ),
+                },
               ],
             ],
           ),

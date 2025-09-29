@@ -1,10 +1,10 @@
 import 'dart:developer';
 
 import '../entities/user.dart';
-import '../exception/auth_exceptions.dart';
-import '../exception/firestore_exceptions.dart';
+import '../exceptions/auth_exceptions.dart';
+import '../exceptions/firestore_exceptions.dart';
 import '../repositories/auth_repository.dart';
-import '../repositories/storage_repository.dart';
+import '../repositories/user_profile_repository.dart';
 
 class AuthUseCase {
   final AuthRepository _authRepository;

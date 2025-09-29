@@ -1,11 +1,16 @@
-import '../../style_theme.dart';
-import '../../utils/app_colors.dart';
+import 'package:eatzy/presentation/configs/constant_images.dart';
+import 'package:eatzy/presentation/view/widgets/text/title_text.dart';
+import 'package:eatzy/utils/extensions/extensions.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-class TextInput extends StatefulWidget {
+import '../../configs/constant_colors.dart';
+import '../../configs/constant_sizes.dart';
+
+class TextInputField extends StatefulWidget {
   final TextEditingController? controller;
+  final TextInputType inputType;
   final FocusNode? focusNode;
+  final String? title;
   final String? hintText;
   final bool obscureText;
   final ValueChanged<String>? onChange;
@@ -17,9 +22,11 @@ class TextInput extends StatefulWidget {
   final String? errorText;
   final bool readOnly;
 
-  const TextInput({
+  const TextInputField({
     this.controller,
+    this.inputType = TextInputType.text,
     this.focusNode,
+    this.title,
     this.hintText,
     this.obscureText = false,
     this.onChange,
@@ -34,10 +41,10 @@ class TextInput extends StatefulWidget {
   });
 
   @override
-  State<TextInput> createState() => _TextInputState();
+  State<TextInputField> createState() => _TextInputFieldState();
 }
 
-class _TextInputState extends State<TextInput> {
+class _TextInputFieldState extends State<TextInputField> {
   late bool _isObscure;
 
   @override
@@ -48,77 +55,86 @@ class _TextInputState extends State<TextInput> {
 
   @override
   Widget build(BuildContext context) {
-    return TextFormField(
-      controller: widget.controller,
-      key: widget.key,
-      obscureText: _isObscure,
-      readOnly: widget.readOnly,
-      showCursor: !widget.readOnly,
-      enableInteractiveSelection: !widget.readOnly,
-      onChanged: widget.onChange,
-      onFieldSubmitted: widget.onFieldSubmitted,
-      onEditingComplete: widget.onEditingComplete,
-      style: widget.readOnly
-          ? AppTextStyle.hintTextStyle(context)
-          : Theme.of(context).textTheme.bodyMedium,
-      decoration: InputDecoration(
-        hintText: widget.hintText,
-        filled: true,
-        fillColor: AppColors.neutralWhite,
-        hintStyle: AppTextStyle.hintTextStyle(context),
-        errorText: widget.errorText,
-        errorMaxLines: 2,
-        contentPadding: EdgeInsets.symmetric(
-          horizontal: Sizes.sizeS.w,
-          vertical: Sizes.sizeM.h,
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(Sizes.sizeM.r),
-          borderSide: BorderSide(color: AppColors.grey300, width: 1),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(Sizes.sizeM.r),
-          borderSide: BorderSide(
-            color: widget.readOnly ? AppColors.grey300 : AppColors.selected,
-            width: 1,
+    return <Widget>[
+      if (widget.title != null) ...[
+        TitleText(widget.title!),
+        SizedBox(height: context.autoAdaptive(s8)),
+      ],
+      TextFormField(
+        controller: widget.controller,
+        key: widget.key,
+        obscureText: _isObscure,
+        readOnly: widget.readOnly,
+        showCursor: !widget.readOnly,
+        enableInteractiveSelection: !widget.readOnly,
+        onChanged: widget.onChange,
+        onFieldSubmitted: widget.onFieldSubmitted,
+        onEditingComplete: widget.onEditingComplete,
+        style: widget.readOnly
+            ? Theme.of(context).textTheme.bodyMedium!.copyWith(color: kGrey500)
+            : Theme.of(context).textTheme.bodyLarge,
+        decoration: InputDecoration(
+          hintText: widget.hintText,
+          hintStyle: Theme.of(
+            context,
+          ).textTheme.bodyMedium!.copyWith(color: kGrey500),
+          errorText: widget.errorText,
+          errorMaxLines: 2,
+          filled: true,
+          fillColor: kLightYellow,
+          contentPadding: EdgeInsets.symmetric(
+            horizontal: context.autoAdaptive(s8),
+            vertical: context.autoAdaptive(s16),
           ),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(Sizes.sizeM.r),
-          borderSide: BorderSide(
-            color: widget.readOnly ? Colors.transparent : AppColors.error,
-            width: 1,
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(context.autoAdaptive(s16)),
+            borderSide: const BorderSide(color: kGrey300, width: 1),
           ),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(Sizes.sizeM.r),
-          borderSide: BorderSide(
-            color: widget.readOnly ? Colors.transparent : AppColors.error,
-            width: 1,
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(context.autoAdaptive(s16)),
+            borderSide: BorderSide(
+              color: widget.readOnly ? kGrey300 : kPrimaryYellow,
+              width: 1,
+            ),
           ),
+          focusedErrorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(context.autoAdaptive(s16)),
+            borderSide: BorderSide(
+              color: widget.readOnly ? kTransparent : kError,
+              width: 1,
+            ),
+          ),
+          errorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(context.autoAdaptive(s16)),
+            borderSide: BorderSide(
+              color: widget.readOnly ? kTransparent : kError,
+              width: 1,
+            ),
+          ),
+          disabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(context.autoAdaptive(s16)),
+            borderSide: const BorderSide(color: kGrey200, width: 1),
+          ),
+          prefixIcon: widget.prefixIcon,
+          suffix: widget.suffix,
+          suffixIcon:
+              widget.suffixIcon ??
+              (widget.obscureText
+                  ? IconButton(
+                      icon: Image.asset(
+                        _isObscure ? kShowOffIcon : kShowOnIcon,
+                        width: context.autoAdaptive(s20),
+                        height: context.autoAdaptive(s20),
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _isObscure = !_isObscure;
+                        });
+                      },
+                    )
+                  : null),
         ),
-        disabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(Sizes.sizeM.r),
-          borderSide: BorderSide(color: AppColors.grey200, width: 1),
-        ),
-        prefixIcon: widget.prefixIcon,
-        suffix: widget.suffix,
-        suffixIcon:
-            widget.suffixIcon ??
-            (widget.obscureText
-                ? IconButton(
-                    icon: Icon(
-                      _isObscure ? Icons.visibility_off : Icons.visibility,
-                      color: AppColors.grey700,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        _isObscure = !_isObscure;
-                      });
-                    },
-                  )
-                : null),
       ),
-    );
+    ].addColumn(crossAxisAlignment: CrossAxisAlignment.start);
   }
 }

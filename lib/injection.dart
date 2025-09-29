@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eatzy/presentation/bloc/app/app_bloc.dart';
+import 'package:eatzy/presentation/bloc/login/login_cubit.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -66,6 +67,11 @@ Future<void> setupDependencies() async {
       authRepository: getIt<AuthRepository>(),
       userProfileRepository: getIt<UserProfileRepository>(),
     ),
+  );
+
+  // Cubit
+  getIt.registerFactory<LoginCubit>(
+    () => LoginCubit(authUseCase: getIt<AuthUseCase>()),
   );
 
   // Bloc

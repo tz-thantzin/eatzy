@@ -1,104 +1,80 @@
+import 'dart:async';
+
+import 'package:eatzy/presentation/view/login/login_page.dart';
+import 'package:eatzy/presentation/view/onboarding/onboarding_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:portfolio/views/about_me/about_page.dart';
-import 'package:portfolio/views/contact/contact_page.dart';
-import 'package:portfolio/views/error_view.dart';
-import 'package:portfolio/views/home/home_page.dart';
-import 'package:portfolio/views/portfolio/portfolio_page.dart';
-import 'package:portfolio/views/skill/skills_page.dart';
-import 'package:portfolio/views/work_experience/work_experiences_page.dart';
 
-class NavigationArguments {
-  final bool showCustomAnimation;
+import '../presentation/bloc/app/app_bloc.dart';
+import '../presentation/view/error_view.dart';
 
-  NavigationArguments({this.showCustomAnimation = true});
+class GoRouterRefreshStream extends ChangeNotifier {
+  late final StreamSubscription<dynamic> _subscription;
+
+  GoRouterRefreshStream(Stream<dynamic> stream) {
+    _subscription = stream.listen((_) {
+      notifyListeners();
+    });
+  }
+
+  @override
+  void dispose() {
+    _subscription.cancel();
+    super.dispose();
+  }
 }
 
-class AppRouter {
-  static final GoRouter router = GoRouter(
+GoRouter createAppRouter(AppBloc appBloc) {
+  return GoRouter(
     initialLocation: RoutePaths.initial,
+    refreshListenable: GoRouterRefreshStream(appBloc.stream),
+    redirect: (BuildContext context, GoRouterState state) {
+      final currentPath = state.uri.path;
+      final status = appBloc.state.status;
+
+      switch (status) {
+        case AppStatus.firstLaunch:
+          return currentPath == RoutePaths.initial ? null : RoutePaths.initial;
+
+        case AppStatus.authenticated:
+          if (currentPath == RoutePaths.home) return null;
+          return RoutePaths.home;
+
+        case AppStatus.unauthenticated:
+          return currentPath == RoutePaths.login ? null : RoutePaths.login;
+        case AppStatus.authenticating:
+          return currentPath == RoutePaths.loading ? null : RoutePaths.loading;
+      }
+    },
     routes: [
-      _route(
+      GoRoute(
         path: RoutePaths.initial,
         name: RouteName.initial,
-        builder: (context, state) {
-          final args = state.extra as NavigationArguments?;
-          return HomePage(
-            showCustomAnimation: args?.showCustomAnimation ?? true,
-          );
-        },
+        builder: (context, state) => const OnboardingScreen(),
       ),
-      _route(
-        path: RoutePaths.home,
-        name: RouteName.home,
-        builder: (context, state) {
-          final args = state.extra as NavigationArguments?;
-          return HomePage(
-            showCustomAnimation: args?.showCustomAnimation ?? true,
-          );
-        },
-      ),
-      _route(
-        path: RoutePaths.about,
-        name: RouteName.about,
-        builder: (context, state) => const AboutMePage(),
-      ),
-      _route(
-        path: RoutePaths.experience,
-        name: RouteName.experience,
-        builder: (context, state) => const WorkExperiencePage(),
-      ),
-      _route(
-        path: RoutePaths.portfolio,
-        name: RouteName.portfolio,
-        builder: (context, state) => const PortfolioPage(),
-      ),
-      _route(
-        path: RoutePaths.skills,
-        name: RouteName.skills,
-        builder: (context, state) => const SkillsView(),
-      ),
-      _route(
-        path: RoutePaths.contact,
-        name: RouteName.contact,
-        builder: (context, state) => const ContactPage(),
+      GoRoute(
+        path: RoutePaths.login,
+        name: RouteName.login,
+        builder: (context, state) => const LoginPage(),
       ),
     ],
     errorBuilder: (context, state) => const ErrorView(),
   );
-
-  static GoRoute _route({
-    required String path,
-    required Widget Function(BuildContext, GoRouterState) builder,
-    String? name,
-  }) {
-    return GoRoute(
-      path: path,
-      name: name,
-      pageBuilder: (context, state) {
-        final child = builder(context, state);
-        return NoTransitionPage(key: state.pageKey, child: child);
-      },
-    );
-  }
 }
 
 class RouteName {
   static const initial = "/";
+  static const loading = 'loading';
+  static const onboarding = 'onboarding';
+  static const login = 'login';
+  static const signup = 'signup';
   static const home = "home";
-  static const about = "about";
-  static const experience = "experience";
-  static const portfolio = "portfolio";
-  static const skills = "skills";
-  static const contact = "contact";
 }
 
 class RoutePaths {
   static const initial = "/";
+  static const loading = '/loading';
+  static const login = "/login";
+  static const signup = "/signup";
   static const home = "/home";
-  static const about = "/about";
-  static const experience = "/experience";
-  static const portfolio = "/portfolio";
-  static const skills = "/skills";
-  static const contact = "/contact";
 }

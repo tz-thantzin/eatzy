@@ -13,7 +13,6 @@ class User extends Equatable {
   final DateTime? lastLogin;
   final String? gender;
   final bool isEmailVerified;
-  final bool isUserProfileExist;
 
   const User({
     required this.uid,
@@ -25,7 +24,6 @@ class User extends Equatable {
     this.lastLogin,
     this.gender,
     this.isEmailVerified = false,
-    this.isUserProfileExist = false,
   });
 
   User copyWith({
@@ -50,7 +48,6 @@ class User extends Equatable {
       lastLogin: lastLogin ?? this.lastLogin,
       gender: gender ?? this.gender,
       isEmailVerified: isEmailVerified ?? this.isEmailVerified,
-      isUserProfileExist: isUserProfileExist ?? this.isUserProfileExist,
     );
   }
 
@@ -65,12 +62,11 @@ class User extends Equatable {
     lastLogin,
     gender,
     isEmailVerified,
-    isUserProfileExist,
   ];
 
   @override
   String toString() {
-    return 'User(uid: $uid, email: $email, name: $name, photo: $photo, imageBytes: ${imageBytes?.isNotEmpty},  dob: $dob , lastLogin: $lastLogin, gender: $gender, isEmailVerified: $isEmailVerified, isUserProfileExist: $isUserProfileExist)';
+    return 'User(uid: $uid, email: $email, name: $name, photo: $photo, imageBytes: ${imageBytes?.isNotEmpty},  dob: $dob , lastLogin: $lastLogin, gender: $gender, isEmailVerified: $isEmailVerified)';
   }
 }
 

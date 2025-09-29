@@ -1,13 +1,31 @@
+import 'package:eatzy/presentation/configs/configs.dart';
+import 'package:eatzy/utils/extensions/extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:portfolio/presentations/configs/duration.dart';
-
-import '../../presentations/configs/constant_colors.dart';
-import '../../presentations/configs/constant_sizes.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class AnimatedSlideButton extends StatefulWidget {
-  AnimatedSlideButton({
+  final String title;
+  final TextStyle? titleStyle;
+  final IconData iconData;
+  final double iconSize;
+  final Color iconColor;
+  final Color buttonColor;
+  final Color borderColor;
+  final Color onHoverColor;
+  final double width;
+  final double borderWidth;
+  final double height;
+  final double borderRadius;
+  final ButtonStyle? buttonStyle;
+  final VoidCallback? onPressed;
+  final Duration duration;
+  final Curve curve;
+  final bool hasIcon;
+  final bool isLoading;
+
+  const AnimatedSlideButton({
     super.key,
     required this.title,
     this.titleStyle,
@@ -16,36 +34,18 @@ class AnimatedSlideButton extends StatefulWidget {
     this.height = s48,
     this.onPressed,
     this.hasIcon = true,
-    this.iconColor = kWhite,
-    this.buttonColor = kBlack,
-    this.borderColor = kBlack,
-    this.onHoverColor = kWhite,
+    this.iconColor = kPrimaryOrange,
+    this.buttonColor = kPrimaryOrange,
+    this.borderColor = kPrimaryOrange,
+    this.onHoverColor = kLightYellow,
     this.iconData = FontAwesomeIcons.telegram,
     this.iconSize = s14,
     this.duration = duration1000,
     this.curve = Curves.fastOutSlowIn,
     this.buttonStyle,
     this.isLoading = false,
+    this.borderRadius = 8.0,
   });
-
-  final String title;
-  final TextStyle? titleStyle;
-  final IconData iconData;
-  final double iconSize;
-  final Color iconColor;
-  final Color buttonColor;
-  final Color borderColor;
-
-  final Color onHoverColor;
-  final double width;
-  final double borderWidth;
-  final double height;
-  final ButtonStyle? buttonStyle;
-  final VoidCallback? onPressed;
-  final Duration duration;
-  final Curve curve;
-  final bool hasIcon;
-  final bool isLoading;
 
   @override
   State<AnimatedSlideButton> createState() => _AnimatedSlideButtonState();
@@ -62,21 +62,15 @@ class _AnimatedSlideButtonState extends State<AnimatedSlideButton>
   void initState() {
     super.initState();
     _controller = AnimationController(vsync: this, duration: widget.duration);
-    _textAndIconColor =
-        ColorTween(
-          begin: widget.onHoverColor,
-          end: widget.buttonColor,
-        ).animate(_controller)..addListener(() {
-          setState(() {});
-        });
+    _textAndIconColor = ColorTween(
+      begin: widget.onHoverColor,
+      end: widget.buttonColor,
+    ).animate(_controller)..addListener(() => setState(() {}));
 
-    _offsetAnimation =
-        Tween<Offset>(
-          begin: Offset(0, 0),
-          end: Offset(0.5, 0),
-        ).animate(_controller)..addListener(() {
-          setState(() {});
-        });
+    _offsetAnimation = Tween<Offset>(
+      begin: const Offset(0, 0),
+      end: const Offset(0.5, 0),
+    ).animate(_controller)..addListener(() => setState(() {}));
   }
 
   @override
@@ -87,26 +81,28 @@ class _AnimatedSlideButtonState extends State<AnimatedSlideButton>
 
   @override
   Widget build(BuildContext context) {
-    TextTheme textTheme = Theme.of(context).textTheme;
-    TextStyle? style = textTheme.bodyMedium?.copyWith(
-      color: _textAndIconColor.value,
-      fontSize: s14,
-      fontWeight: FontWeight.w400,
+    TextStyle? style = GoogleFonts.leagueSpartan(
+      textStyle: context.labelLarge.copyWith(
+        color: _textAndIconColor.value,
+        fontWeight: semiBold,
+      ),
     );
+
     final ButtonStyle defaultButtonStyle = ElevatedButton.styleFrom(
       foregroundColor: widget.onHoverColor,
       backgroundColor: widget.onHoverColor,
-      padding: EdgeInsets.all(0),
+      padding: EdgeInsets.zero,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(0)),
-        side: BorderSide(width: 1, color: widget.borderColor),
+        borderRadius: BorderRadius.circular(widget.borderRadius),
+        side: BorderSide(width: widget.borderWidth, color: widget.borderColor),
       ),
     );
+
     return MouseRegion(
-      key: ValueKey('MouseRegion_Animated_Slide_Button'),
+      key: UniqueKey(),
       onEnter: (e) => _mouseEnter(true),
       onExit: (e) => _mouseEnter(false),
-      child: Container(
+      child: SizedBox(
         width: widget.width,
         height: widget.height,
         child: ElevatedButton(
@@ -137,7 +133,10 @@ class _AnimatedSlideButtonState extends State<AnimatedSlideButton>
         duration: widget.duration,
         width: _isHovering ? 0 : widget.width,
         height: widget.height,
-        color: widget.buttonColor,
+        decoration: BoxDecoration(
+          color: widget.buttonColor,
+          borderRadius: BorderRadius.circular(widget.borderRadius),
+        ),
         curve: widget.curve,
       ),
     );
@@ -147,7 +146,7 @@ class _AnimatedSlideButtonState extends State<AnimatedSlideButton>
     TextTheme textTheme = Theme.of(context).textTheme;
     TextStyle? style = textTheme.bodyMedium?.copyWith(
       color: _textAndIconColor.value,
-      fontSize: s14,
+      fontSize: context.autoAdaptive(s18),
       fontWeight: FontWeight.w400,
     );
 
@@ -160,7 +159,7 @@ class _AnimatedSlideButtonState extends State<AnimatedSlideButton>
             child: Text(
               widget.title,
               style: widget.titleStyle ?? style,
-              overflow: TextOverflow.ellipsis, // prevent overflow
+              overflow: TextOverflow.ellipsis,
               maxLines: 1,
               softWrap: false,
             ),

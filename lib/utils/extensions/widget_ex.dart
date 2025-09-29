@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:visibility_detector/visibility_detector.dart';
 
 extension WidgetEx on Widget {
   Padding addPadding({required EdgeInsetsGeometry padding}) {
@@ -53,6 +52,10 @@ extension WidgetEx on Widget {
     return InkWell(onTap: onTap, child: this, borderRadius: borderRadius);
   }
 
+  Widget addForm({required GlobalKey<FormState> key}) {
+    return Form(key: key, child: this);
+  }
+
   Widget addScrollView({
     ScrollController? controller,
     ScrollPhysics? physics,
@@ -62,17 +65,6 @@ extension WidgetEx on Widget {
       controller: controller,
       physics: physics,
       padding: padding,
-      child: this,
-    );
-  }
-
-  Widget addVisibilityDetector({
-    Key? key,
-    required Function(VisibilityInfo) onDetectVisibility,
-  }) {
-    return VisibilityDetector(
-      key: key ?? UniqueKey(),
-      onVisibilityChanged: onDetectVisibility,
       child: this,
     );
   }

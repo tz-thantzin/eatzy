@@ -1,4 +1,4 @@
-import '../../domain/entities/user.dart';
+import '../entities/user.dart';
 
 abstract class AuthRepository {
   Stream<User?> get user;

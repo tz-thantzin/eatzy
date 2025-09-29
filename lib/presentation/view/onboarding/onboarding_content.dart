@@ -1,66 +1,116 @@
+import 'package:eatzy/presentation/configs/configs.dart';
+import 'package:eatzy/utils/extensions/extensions.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+
+import '../../../domain/entities/onboarding.dart';
+import '../widgets/buttons/animated_slide_button.dart';
+import 'dot_indicator.dart';
 
 class OnboardingContent extends StatelessWidget {
-  final String image;
-  final String title;
-  final String desc;
+  final Onboarding onboardingData;
+  final VoidCallback? onNextPressed;
+  final VoidCallback? onGetStartedPressed;
+  final int currentPage;
+  final int totalPages;
 
   const OnboardingContent({
     super.key,
-    required this.image,
-    required this.title,
-    required this.desc,
+    required this.onboardingData,
+    this.onNextPressed,
+    this.onGetStartedPressed,
+    required this.currentPage,
+    required this.totalPages,
   });
 
   @override
   Widget build(BuildContext context) {
-    final height = MediaQuery.of(context).size.height;
-    final width = MediaQuery.of(context).size.width;
+    return Stack(
+      children: [
+        /// Background image
+        SizedBox(
+          width: double.infinity,
+          height: context.screenHeight,
+          child: Image.asset(onboardingData.image, fit: BoxFit.cover),
+        ),
 
-    return Padding(
-      padding: const EdgeInsets.all(40.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          /// Image with fade-in
-          SizedBox(
-            height: height * 0.4,
-            child: TweenAnimationBuilder<double>(
-              tween: Tween(begin: 0.8, end: 1.0),
-              duration: const Duration(milliseconds: 500),
-              builder: (context, scale, child) {
-                return Transform.scale(scale: scale, child: Image.asset(image));
-              },
+        /// Bottom container
+        Container(
+          width: double.infinity,
+          height: context.screenHeight * 0.4,
+          padding: EdgeInsets.symmetric(
+            horizontal: context.autoAdaptive(s20),
+            vertical: context.autoAdaptive(s48),
+          ),
+          decoration: BoxDecoration(
+            color: kWhite,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(s30),
+              topRight: Radius.circular(s30),
             ),
           ),
-          const SizedBox(height: 30),
+          child:
+              <Widget>[
+                if (onboardingData.icon.isNotEmpty)
+                  Image.asset(
+                    onboardingData.icon,
+                    width: context.autoAdaptive(s40),
+                    height: context.autoAdaptive(s40),
+                  ),
 
-          /// Title
-          Text(
-            title,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontWeight: FontWeight.w600,
-              fontSize: (width <= 550) ? 30 : 35,
-            ),
-          ),
-          const SizedBox(height: 15),
+                verticalSpaceMassive,
 
-          /// Scrollable description
-          Expanded(
-            child: SingleChildScrollView(
-              child: Text(
-                desc,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontWeight: FontWeight.w300,
-                  fontSize: (width <= 550) ? 17 : 25,
+                Text(
+                  onboardingData.title,
+                  style: GoogleFonts.inter(
+                    fontSize: context.autoAdaptive(s24),
+                    fontWeight: bold,
+                    color: kPrimaryOrange,
+                  ),
                 ),
+
+                verticalSpaceSmall,
+
+                Text(
+                  onboardingData.desc,
+                  style: GoogleFonts.leagueSpartan(
+                    fontSize: context.autoAdaptive(s18),
+                    color: kBlack,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+
+                verticalSpaceMassive,
+
+                /// Dot indicators
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(
+                    totalPages,
+                    (index) =>
+                        DotIndicator(index: index, currentPage: currentPage),
+                  ),
+                ),
+
+                verticalSpaceEnormous,
+
+                /// Next / Get Started Button
+                AnimatedSlideButton(
+                  height: context.autoAdaptive(s36),
+                  title: currentPage == totalPages - 1 ? "Get Started" : "Next",
+                  hasIcon: false,
+                  borderRadius: s50,
+                  onPressed: currentPage == totalPages - 1
+                      ? onGetStartedPressed
+                      : onNextPressed,
+                ),
+              ].addColumn(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
               ),
-            ),
-          ),
-        ],
-      ),
+        ).addAlign(alignment: Alignment.bottomCenter),
+      ],
     );
   }
 }

@@ -1,6 +1,6 @@
 part of 'app_bloc.dart';
 
-enum AppStatus { authenticating, authenticated, unauthenticated }
+enum AppStatus { authenticating, authenticated, unauthenticated, firstLaunch }
 
 final class AppState extends Equatable {
   final AppStatus status;
@@ -18,6 +18,10 @@ final class AppState extends Equatable {
 
   AppState authenticating() {
     return AppState._(status: AppStatus.authenticating, user: user);
+  }
+
+  AppState onboardingNotCompleted() {
+    return AppState._(status: AppStatus.firstLaunch, user: user);
   }
 
   @override

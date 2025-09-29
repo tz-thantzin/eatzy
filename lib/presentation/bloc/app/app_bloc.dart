@@ -1,20 +1,26 @@
+import 'package:eatzy/domain/usecases/shared_preference_usecase.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../domain/entities/user.dart';
-import '../../domain/usecases/auth_usecase.dart';
+import '../../../../domain/entities/user.dart';
+import '../../../domain/usecases/auth_usecase.dart';
 
 part 'app_event.dart';
 part 'app_state.dart';
 
 class AppBloc extends Bloc<AppEvent, AppState> {
   final AuthUseCase _authUseCase;
+  final SharedPreferenceUseCase _sharedPreferenceUseCase;
 
-  AppBloc({required AuthUseCase authUseCase})
-    : _authUseCase = authUseCase,
-      super(AppState()) {
+  AppBloc({
+    required AuthUseCase authUseCase,
+    required SharedPreferenceUseCase sharePreferenceUseCase,
+  }) : _authUseCase = authUseCase,
+       _sharedPreferenceUseCase = sharePreferenceUseCase,
+       super(AppState()) {
     on<UserSubscriptionRequested>(_onUserSubscriptionRequested);
     on<UserProfileAdded>(_onUserProfileAdded);
+    on<OnboardingCompleted>(_onboardingCompleted);
     on<LogoutPressed>(_onLogoutPressed);
   }
 
@@ -23,11 +29,23 @@ class AppBloc extends Bloc<AppEvent, AppState> {
     Emitter<AppState> emit,
   ) {
     emit(state.authenticating());
+
     return emit.onEach(
       _authUseCase.user,
       onData: (User? user) async {
+        final isOnboardingCompleted = await _sharedPreferenceUseCase
+            .isOnboardingCompleted();
+
         if (user == null) {
-          return emit(AppState(user: user));
+          // User not logged in → isOnboardingCompleted -> ? unauthenticated : firstLaunch
+          return emit(
+            AppState._(
+              status: isOnboardingCompleted
+                  ? AppStatus.unauthenticated
+                  : AppStatus.firstLaunch,
+              user: null,
+            ),
+          );
         }
 
         User userProfile = await _authUseCase.getUserProfile(
@@ -35,10 +53,24 @@ class AppBloc extends Bloc<AppEvent, AppState> {
           email: user.email!,
         );
 
+        if (!isOnboardingCompleted) {
+          // User exists but onboarding not completed
+          return emit(AppState(user: userProfile).onboardingNotCompleted());
+        }
+
         emit(AppState(user: userProfile));
       },
       onError: addError,
     );
+  }
+
+  Future<void> _onboardingCompleted(
+    OnboardingCompleted event,
+    Emitter<AppState> emit,
+  ) async {
+    print("_onboardingCompleted");
+    await _sharedPreferenceUseCase.setOnboardingCompleted(true);
+    emit(AppState._(status: AppStatus.unauthenticated));
   }
 
   Future<void> _onUserProfileAdded(

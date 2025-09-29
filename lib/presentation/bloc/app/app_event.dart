@@ -12,6 +12,10 @@ final class UserProfileAdded extends AppEvent {
   const UserProfileAdded();
 }
 
+final class OnboardingCompleted extends AppEvent {
+  const OnboardingCompleted();
+}
+
 final class LogoutPressed extends AppEvent {
   const LogoutPressed();
 }

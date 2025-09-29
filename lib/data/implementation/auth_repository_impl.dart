@@ -1,9 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 
 import '../../domain/entities/user.dart';
-import '../../domain/exception/auth_exceptions.dart';
+import '../../domain/exceptions/auth_exceptions.dart';
 import '../../domain/repositories/auth_repository.dart';
-import '../data_sources/auth_datasource.dart';
+import '../datasources/auth_datasource.dart';
+import '../model/user_model.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
   final AuthDatasource _datasource;
@@ -12,15 +13,16 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Stream<User?> get user =>
-      _datasource.user.map((firebase_auth.User? u) => u?.toUser);
+      _datasource.user.map((UserModel? u) => u?.toEntity());
 
   @override
   Future<User> checkUserInfo() async {
-    final firebase_auth.User? user = await _datasource.checkUserInformation();
+    final UserModel? user = await _datasource.checkUserInformation();
     if (user == null) {
       throw const NoUserInformationFailure();
     }
-    return user.toUser;
+
+    return user.toEntity();
   }
 
   @override
@@ -29,14 +31,11 @@ class AuthRepositoryImpl implements AuthRepository {
     required String password,
   }) async {
     try {
-      final firebase_auth.User? user = await _datasource.loginWithEmail(
-        email,
-        password,
-      );
+      final UserModel? user = await _datasource.loginWithEmail(email, password);
       if (user == null) {
         throw const LogInWithEmailAndPasswordFailure();
       }
-      return user.toUser;
+      return user.toEntity();
     } on firebase_auth.FirebaseAuthException catch (e) {
       throw LogInWithEmailAndPasswordFailure.fromCode(e.code);
     } catch (_) {
@@ -47,8 +46,8 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<User?> loginWithGoogle() async {
     try {
-      final firebase_auth.User? user = await _datasource.loginWithGoogle();
-      return user?.toUser;
+      final UserModel? user = await _datasource.loginWithGoogle();
+      return user?.toEntity();
     } on firebase_auth.FirebaseAuthException catch (e) {
       throw LogInWithGoogleFailure.fromCode(e.code);
     } catch (e) {
@@ -62,14 +61,14 @@ class AuthRepositoryImpl implements AuthRepository {
     required String password,
   }) async {
     try {
-      final firebase_auth.User? user = await _datasource.signupWithEmail(
+      final UserModel? user = await _datasource.signupWithEmail(
         email,
         password,
       );
       if (user == null) {
         throw const SignUpWithEmailAndPasswordFailure();
       }
-      return user.toUser;
+      return user.toEntity();
     } on firebase_auth.FirebaseAuthException catch (e) {
       throw SignUpWithEmailAndPasswordFailure.fromCode(e.code);
     } catch (_) {
@@ -91,14 +90,4 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<void> logout() => _datasource.logout();
-}
-
-extension on firebase_auth.User {
-  User get toUser => User(
-    uid: uid,
-    email: email,
-    name: displayName,
-    photo: photoURL,
-    isEmailVerified: emailVerified,
-  );
 }
