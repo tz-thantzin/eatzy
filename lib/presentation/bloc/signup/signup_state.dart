@@ -146,13 +146,9 @@ extension SignupStateStatusX on SignupState {
   bool get isSignupGoogleInProgress =>
       status == SignupStatus.signupGoogleInProgress;
 
-  bool get isInProgress => isSignupEmailInProgress || isSignupGoogleInProgress;
-
   bool get isSuccess => status == SignupStatus.success;
 
   bool get isFailure => status == SignupStatus.failure;
-
-  bool get isInProgressOrSuccess => isInProgress || isSuccess;
 }
 
 extension SignupStateValidationMsg on SignupState {

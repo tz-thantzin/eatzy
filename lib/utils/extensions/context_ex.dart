@@ -1,6 +1,7 @@
 import 'package:eatzy/presentation/configs/configs.dart';
 import 'package:eatzy/utils/extensions/extensions.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../l10n/app_localizations.dart';
 
@@ -16,6 +17,12 @@ extension ContextX on BuildContext {
   );
 
   AppLocalizations get localization => AppLocalizations.of(this)!;
+
+  void back() {
+    if (canPop()) {
+      pop();
+    }
+  }
 
   void showCustomSnackBar({
     required String message,

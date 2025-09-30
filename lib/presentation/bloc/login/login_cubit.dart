@@ -25,6 +25,9 @@ class LoginCubit extends Cubit<LoginState> {
   void passwordChanged(String password) =>
       emit(state.loginPasswordChanged(password));
 
+  void resetPasswordEmailChanged(String email) =>
+      emit(state.resetPasswordEmailChanged(email));
+
   Future<void> loginWithEmail() async {
     emit(state.copyWith(status: LoginStatus.loginEmailInProgress));
     try {
@@ -72,6 +75,30 @@ class LoginCubit extends Cubit<LoginState> {
     } catch (e) {
       emit(
         state.copyWith(status: LoginStatus.failure, errorMessage: e.toString()),
+      );
+    }
+  }
+
+  Future<void> sendResetEmail() async {
+    emit(state.copyWith(status: LoginStatus.resetPasswordInProgress));
+    try {
+      await _authUseCase.sendPasswordResetEmail(
+        email: state.resetPasswordEmail.value,
+      );
+      emit(state.copyWith(status: LoginStatus.resetPasswordSuccess));
+    } on SendPasswordResetEmailFailure catch (e) {
+      emit(
+        state.copyWith(
+          errorMessage: e.message,
+          status: LoginStatus.resetPasswordFailure,
+        ),
+      );
+    } catch (e) {
+      emit(
+        state.copyWith(
+          status: LoginStatus.resetPasswordFailure,
+          errorMessage: e.toString(),
+        ),
       );
     }
   }

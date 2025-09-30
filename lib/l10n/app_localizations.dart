@@ -117,6 +117,12 @@ abstract class AppLocalizations {
   /// **'Welcome'**
   String get welcome;
 
+  /// No description provided for @welcome_message.
+  ///
+  /// In en, this message translates to:
+  /// **'Hungry already? Sign in now and let us take care of your next meal, anytime, anywhere.'**
+  String get welcome_message;
+
   /// No description provided for @email.
   ///
   /// In en, this message translates to:
@@ -236,6 +242,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Already have an account?'**
   String get already_have_account;
+
+  /// No description provided for @forgot_password_description.
+  ///
+  /// In en, this message translates to:
+  /// **'We’ll email you a secure link to reset your password. Please check your inbox after submitting.'**
+  String get forgot_password_description;
+
+  /// No description provided for @submit.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit'**
+  String get submit;
 
   /// No description provided for @invalid_email.
   ///

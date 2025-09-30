@@ -1,5 +1,6 @@
 import 'package:eatzy/presentation/configs/configs.dart';
 import 'package:eatzy/presentation/view/widgets/widgets.dart';
+import 'package:eatzy/presentation/view/wrapper.dart';
 import 'package:eatzy/utils/extensions/extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -73,22 +74,7 @@ class LoginView extends StatelessWidget {
             (curr.status == LoginStatus.failure ||
                 curr.status == LoginStatus.success),
         listener: _handleStateChange,
-        child: Container(
-          width: double.infinity,
-          height: context.screenHeight * 0.85,
-          padding: EdgeInsets.symmetric(
-            horizontal: context.autoAdaptive(s20),
-            vertical: context.autoAdaptive(s48),
-          ),
-          decoration: BoxDecoration(
-            color: kWhite,
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(s30),
-              topRight: Radius.circular(s30),
-            ),
-          ),
-          child: _LoginForm(),
-        ).addAlign(alignment: Alignment.bottomCenter),
+        child: _LoginForm().addAlign(alignment: Alignment.bottomCenter),
       ),
     );
   }
@@ -109,98 +95,99 @@ class _LoginFormState extends State<_LoginForm> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<LoginCubit, LoginState>(
-      builder: (_, LoginState state) {
-        final bool canSubmit = state.isLoginValid;
+    return BodyWrapper(
+      child: BlocBuilder<LoginCubit, LoginState>(
+        builder: (_, LoginState state) {
+          final bool canSubmit = state.isLoginValid;
 
-        return <Widget>[
-              TitleText(
-                context.localization.welcome,
-                textAlign: TextAlign.start,
-              ),
-              verticalSpaceSmall,
-              DescriptionText(
-                'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ',
-              ),
-              verticalSpaceMassive,
-
-              /// Input Email
-              TextInputField(
-                controller: _loginEmailCtrl,
-                title: context.localization.email,
-                hintText: context.localization.email,
-                inputType: TextInputType.emailAddress,
-                onChanged: (String value) =>
-                    context.read<LoginCubit>().emailChanged(value.trim()),
-                errorText: state.emailErrorText(context),
-              ),
-              verticalSpaceLarge,
-
-              /// Input Password
-              TextInputField(
-                controller: _loginPassCtrl,
-                title: context.localization.password,
-                hintText: context.localization.password,
-                obscureText: true,
-                onChanged: (String value) =>
-                    context.read<LoginCubit>().passwordChanged(value.trim()),
-                errorText: state.passwordErrorText(context),
-              ),
-              verticalSpaceSmall,
-
-              /// Forgot Password
-              AnimatedTextButton(
-                context.localization.forgot_password,
-                onPressed: () {},
-              ).addAlign(alignment: Alignment.centerRight),
-              verticalSpaceEnormous,
-
-              /// Login Button
-              AnimatedSlideButton(
-                width: context.screenWidth * 0.45,
-                title: context.localization.login,
-                hasIcon: false,
-                borderRadius: 50,
-                isLoading: state.isLoginEmailInProgress,
-                buttonColor: canSubmit ? kPrimaryOrange : kGrey500,
-                onPressed: canSubmit
-                    ? context.read<LoginCubit>().loginWithEmail
-                    : null,
-              ).addAlign(alignment: Alignment.center),
-              verticalSpaceMedium,
-
-              DescriptionText(
-                context.localization.signup_with,
-              ).addAlign(alignment: Alignment.center),
-              verticalSpaceMedium,
-
-              /// Google
-              AnimatedIconButton(
-                imageName: kGoogleIcon,
-                isLoading: state.isLoginGoogleInProgress,
-                onPressed: context.read<LoginCubit>().loginWithGoogle,
-              ).addAlign(alignment: Alignment.center),
-              verticalSpaceMedium,
-
-              /// Signup
-              <Widget>[
-                DescriptionText(context.localization.not_have_account),
-                horizontalSpaceTiny,
-                AnimatedTextButton(
-                  context.localization.signup,
-                  textColor: kPrimaryOrange,
-                  onPressed: () =>
-                      GoRouter.of(context).pushNamed(RouteName.signup),
+          return <Widget>[
+                TitleText(
+                  context.localization.welcome,
+                  textAlign: TextAlign.start,
                 ),
-              ].addRow(mainAxisAlignment: MainAxisAlignment.center),
-            ]
-            .addColumn(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-            )
-            .addScrollView()
-            .addForm(key: _formKey);
-      },
+                verticalSpaceSmall,
+                DescriptionText(context.localization.welcome_message),
+                verticalSpaceMassive,
+
+                /// Input Email
+                TextInputField(
+                  controller: _loginEmailCtrl,
+                  title: context.localization.email,
+                  hintText: context.localization.email,
+                  inputType: TextInputType.emailAddress,
+                  onChanged: (String value) =>
+                      context.read<LoginCubit>().emailChanged(value.trim()),
+                  errorText: state.emailErrorText(context),
+                ),
+                verticalSpaceLarge,
+
+                /// Input Password
+                TextInputField(
+                  controller: _loginPassCtrl,
+                  title: context.localization.password,
+                  hintText: context.localization.password,
+                  obscureText: true,
+                  onChanged: (String value) =>
+                      context.read<LoginCubit>().passwordChanged(value.trim()),
+                  errorText: state.passwordErrorText(context),
+                ),
+                verticalSpaceSmall,
+
+                /// Forgot Password
+                AnimatedTextButton(
+                  context.localization.forgot_password,
+                  onPressed: () =>
+                      GoRouter.of(context).pushNamed(RouteName.forgotPassword),
+                ).addAlign(alignment: Alignment.centerRight),
+                verticalSpaceEnormous,
+
+                /// Login Button
+                AnimatedSlideButton(
+                  width: context.screenWidth * 0.45,
+                  title: context.localization.login,
+                  hasIcon: false,
+                  borderRadius: 50,
+                  isLoading: state.isLoginEmailInProgress,
+                  buttonColor: canSubmit ? kPrimaryOrange : kGrey500,
+                  onPressed: canSubmit
+                      ? context.read<LoginCubit>().loginWithEmail
+                      : null,
+                ).addAlign(alignment: Alignment.center),
+                verticalSpaceMedium,
+
+                DescriptionText(
+                  context.localization.signup_with,
+                ).addAlign(alignment: Alignment.center),
+                verticalSpaceMedium,
+
+                /// Google
+                AnimatedIconButton(
+                  imageName: kGoogleIcon,
+                  isLoading: state.isLoginGoogleInProgress,
+                  onPressed: context.read<LoginCubit>().loginWithGoogle,
+                ).addAlign(alignment: Alignment.center),
+                verticalSpaceMedium,
+
+                /// Signup
+                <Widget>[
+                  DescriptionText(context.localization.not_have_account),
+                  horizontalSpaceTiny,
+                  AnimatedTextButton(
+                    context.localization.signup,
+                    textColor: kPrimaryOrange,
+                    onPressed: () =>
+                        GoRouter.of(context).pushNamed(RouteName.signup),
+                  ),
+                ].addRow(mainAxisAlignment: MainAxisAlignment.center),
+              ]
+              .addColumn(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+              )
+              .addScrollView()
+              .addForm(key: _formKey);
+        },
+      ),
     );
   }
 }

@@ -21,6 +21,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get welcome => 'Welcome';
 
   @override
+  String get welcome_message => 'Hungry already? Sign in now and let us take care of your next meal, anytime, anywhere.';
+
+  @override
   String get email => 'Email';
 
   @override
@@ -79,6 +82,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get already_have_account => 'Already have an account?';
+
+  @override
+  String get forgot_password_description => 'We’ll email you a secure link to reset your password. Please check your inbox after submitting.';
+
+  @override
+  String get submit => 'Submit';
 
   @override
   String get invalid_email => 'Invalid email address';

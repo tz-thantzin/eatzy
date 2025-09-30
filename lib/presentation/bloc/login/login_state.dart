@@ -4,9 +4,12 @@ enum LoginStatus {
   initial,
   loginEmailInProgress,
   loginGoogleInProgress,
+  resetPasswordInProgress,
   success,
   failure,
   canceled,
+  resetPasswordSuccess,
+  resetPasswordFailure,
 }
 
 class LoginState extends Equatable {
@@ -14,6 +17,7 @@ class LoginState extends Equatable {
   final LoginStatus status;
   final EmailInput loginEmail;
   final PasswordInput loginPassword;
+  final EmailInput resetPasswordEmail;
 
   final String? errorMessage;
 
@@ -22,6 +26,7 @@ class LoginState extends Equatable {
     this.status = LoginStatus.initial,
     this.loginEmail = const EmailInput.pure(),
     this.loginPassword = const PasswordInput.pure(),
+    this.resetPasswordEmail = const EmailInput.pure(),
     this.errorMessage,
   });
 
@@ -32,6 +37,7 @@ class LoginState extends Equatable {
     LoginStatus? status,
     EmailInput? loginEmail,
     PasswordInput? loginPassword,
+    EmailInput? resetPasswordEmail,
     String? errorMessage,
   }) {
     return LoginState(
@@ -39,6 +45,7 @@ class LoginState extends Equatable {
       status: status ?? this.status,
       loginEmail: loginEmail ?? this.loginEmail,
       loginPassword: loginPassword ?? this.loginPassword,
+      resetPasswordEmail: resetPasswordEmail ?? this.resetPasswordEmail,
       errorMessage: errorMessage ?? this.errorMessage,
     );
   }
@@ -58,8 +65,15 @@ class LoginState extends Equatable {
     );
   }
 
+  LoginState resetPasswordEmailChanged(String email) {
+    return copyWith(resetPasswordEmail: EmailInput.dirty(email));
+  }
+
   bool get isLoginValid =>
       Formz.validate(<FormzInput<String, dynamic>>[loginEmail, loginPassword]);
+
+  bool get isForgotPasswordValid =>
+      Formz.validate(<FormzInput<String, dynamic>>[resetPasswordEmail]);
 
   @override
   List<Object?> get props => <Object?>[
@@ -67,6 +81,7 @@ class LoginState extends Equatable {
     status,
     loginEmail,
     loginPassword,
+    resetPasswordEmail,
     errorMessage,
   ];
 }
@@ -79,13 +94,12 @@ extension LoginStateStatusX on LoginState {
   bool get isLoginGoogleInProgress =>
       status == LoginStatus.loginGoogleInProgress;
 
-  bool get isInProgress => isLoginEmailInProgress || isLoginGoogleInProgress;
+  bool get isResetPasswordInProgress =>
+      status == LoginStatus.resetPasswordInProgress;
 
   bool get isSuccess => status == LoginStatus.success;
 
   bool get isFailure => status == LoginStatus.failure;
-
-  bool get isInProgressOrSuccess => isInProgress || isSuccess;
 }
 
 extension LoginStateValidationMsg on LoginState {

@@ -3,6 +3,7 @@ import 'dart:developer';
 
 import 'package:eatzy/presentation/view/home/home_page.dart';
 import 'package:eatzy/presentation/view/loading_view.dart';
+import 'package:eatzy/presentation/view/login/forgot_password_page.dart';
 import 'package:eatzy/presentation/view/login/login_page.dart';
 import 'package:eatzy/presentation/view/onboarding/onboarding_screen.dart';
 import 'package:flutter/material.dart';
@@ -46,7 +47,8 @@ GoRouter createAppRouter(AppBloc appBloc) {
 
         case AppStatus.unauthenticated:
           if (currentPath == RoutePaths.login ||
-              currentPath == RoutePaths.signup) {
+              currentPath == RoutePaths.signup ||
+              currentPath == RoutePaths.forgotPassword) {
             return null;
           }
           return RoutePaths.login;
@@ -81,6 +83,11 @@ GoRouter createAppRouter(AppBloc appBloc) {
         name: RouteName.home,
         builder: (context, state) => const HomePage(),
       ),
+      GoRoute(
+        path: RoutePaths.forgotPassword,
+        name: RouteName.forgotPassword,
+        builder: (context, state) => const ForgotPasswordPage(),
+      ),
     ],
     errorBuilder: (context, state) {
       log('Routes:', error: state.error);
@@ -96,6 +103,7 @@ class RouteName {
   static const onboarding = 'onboarding';
   static const login = 'login';
   static const signup = 'signup';
+  static const forgotPassword = 'forgotPassword';
   static const home = "home";
 }
 
@@ -104,5 +112,6 @@ class RoutePaths {
   static const loading = '/loading';
   static const login = "/login";
   static const signup = "/signup";
+  static const forgotPassword = "/forgotPassword";
   static const home = "/home";
 }
