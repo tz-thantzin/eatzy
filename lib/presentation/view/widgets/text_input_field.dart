@@ -13,7 +13,7 @@ class TextInputField extends StatefulWidget {
   final String? title;
   final String? hintText;
   final bool obscureText;
-  final ValueChanged<String>? onChange;
+  final ValueChanged<String>? onChanged;
   final ValueChanged<String>? onFieldSubmitted;
   final VoidCallback? onEditingComplete;
   final Widget? prefixIcon;
@@ -21,6 +21,7 @@ class TextInputField extends StatefulWidget {
   final Widget? suffixIcon;
   final String? errorText;
   final bool readOnly;
+  final VoidCallback? onTap;
 
   const TextInputField({
     this.controller,
@@ -29,7 +30,7 @@ class TextInputField extends StatefulWidget {
     this.title,
     this.hintText,
     this.obscureText = false,
-    this.onChange,
+    this.onChanged,
     this.onFieldSubmitted,
     this.onEditingComplete,
     this.suffix,
@@ -37,6 +38,7 @@ class TextInputField extends StatefulWidget {
     this.prefixIcon,
     this.errorText,
     this.readOnly = false,
+    this.onTap,
     super.key,
   });
 
@@ -58,21 +60,23 @@ class _TextInputFieldState extends State<TextInputField> {
     return <Widget>[
       if (widget.title != null) ...[
         TitleText(widget.title!),
-        SizedBox(height: context.autoAdaptive(s8)),
+        verticalSpaceSmall,
       ],
       TextFormField(
-        controller: widget.controller,
         key: widget.key,
+        controller: widget.controller,
+        focusNode: widget.focusNode,
         obscureText: _isObscure,
         readOnly: widget.readOnly,
         showCursor: !widget.readOnly,
+        onTap: widget.onTap,
         enableInteractiveSelection: !widget.readOnly,
-        onChanged: widget.onChange,
+        onChanged: widget.onChanged,
         onFieldSubmitted: widget.onFieldSubmitted,
         onEditingComplete: widget.onEditingComplete,
-        style: widget.readOnly
-            ? Theme.of(context).textTheme.bodyMedium!.copyWith(color: kGrey500)
-            : Theme.of(context).textTheme.bodyLarge,
+        style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+          color: widget.readOnly ? kBlack : kGrey500,
+        ),
         decoration: InputDecoration(
           hintText: widget.hintText,
           hintStyle: Theme.of(

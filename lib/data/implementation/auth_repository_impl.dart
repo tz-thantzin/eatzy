@@ -1,4 +1,7 @@
+import 'dart:developer';
+
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
+import 'package:google_sign_in/google_sign_in.dart';
 
 import '../../domain/entities/user.dart';
 import '../../domain/exceptions/auth_exceptions.dart';
@@ -48,9 +51,12 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       final UserModel? user = await _datasource.loginWithGoogle();
       return user?.toEntity();
+    } on GoogleSignInException catch (e) {
+      throw LogInWithGoogleFailure.fromCode(e.code.name);
     } on firebase_auth.FirebaseAuthException catch (e) {
       throw LogInWithGoogleFailure.fromCode(e.code);
-    } catch (e) {
+    } catch (e, st) {
+      log('loginWithGoogles : ', error: e, stackTrace: st);
       throw const LogInWithGoogleFailure();
     }
   }

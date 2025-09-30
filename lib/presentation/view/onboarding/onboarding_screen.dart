@@ -66,7 +66,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               top: 20,
               right: 20,
               child: AnimatedTextButton(
-                'Skip',
+                context.localization.skip,
                 suffixIcon: Image.asset(
                   kRightArrow,
                   width: context.autoAdaptive(s8),

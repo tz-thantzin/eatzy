@@ -74,6 +74,8 @@ class LogInWithGoogleFailure implements Exception {
         return const LogInWithGoogleFailure(
           'auth_error_invalid_verification_id',
         );
+      case 'canceled':
+        return const LogInWithGoogleFailure('auth_error_user_canceled');
       default:
         return const LogInWithGoogleFailure('auth_error_unknown');
     }

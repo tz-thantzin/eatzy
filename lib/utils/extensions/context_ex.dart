@@ -2,6 +2,8 @@ import 'package:eatzy/presentation/configs/configs.dart';
 import 'package:eatzy/utils/extensions/extensions.dart';
 import 'package:flutter/material.dart';
 
+import '../../l10n/app_localizations.dart';
+
 extension ContextX on BuildContext {
   double get screenWidth => MediaQuery.of(this).size.width;
   double get screenHeight => MediaQuery.of(this).size.height;
@@ -12,6 +14,8 @@ extension ContextX on BuildContext {
     width: percentWidth(pWidth ?? 0),
     height: percentHeight(pHeight ?? 0),
   );
+
+  AppLocalizations get localization => AppLocalizations.of(this)!;
 
   void showCustomSnackBar({
     required String message,

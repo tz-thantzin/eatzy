@@ -97,7 +97,9 @@ class OnboardingContent extends StatelessWidget {
                 /// Next / Get Started Button
                 AnimatedSlideButton(
                   height: context.autoAdaptive(s36),
-                  title: currentPage == totalPages - 1 ? "Get Started" : "Next",
+                  title: currentPage == totalPages - 1
+                      ? context.localization.get_started
+                      : context.localization.next,
                   hasIcon: false,
                   borderRadius: s50,
                   onPressed: currentPage == totalPages - 1

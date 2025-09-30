@@ -5,8 +5,10 @@ import 'package:eatzy/utils/extensions/extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../routes/routes.dart';
 import '../../bloc/login/login_cubit.dart';
 
 class LoginPage extends StatelessWidget {
@@ -33,8 +35,7 @@ class LoginView extends StatelessWidget {
       context.read<LoginCubit>().sendEmailVerification();
       context.showCustomSnackBar(
         type: SnackBarType.warning,
-        message:
-            'Your email is not verified. Please verify it and log in again.',
+        message: context.localization.email_not_verified,
       );
     }
     // Failure case
@@ -43,7 +44,7 @@ class LoginView extends StatelessWidget {
         type: SnackBarType.error,
         message: state.errorMessage != null
             ? state.authFailureMsg(context, state.errorMessage ?? '')
-            : 'Something went wrong. Please try again later.',
+            : context.localization.unknown_error,
       );
     }
   }
@@ -58,7 +59,7 @@ class LoginView extends StatelessWidget {
         centerTitle: true,
         automaticallyImplyLeading: false,
         title: Text(
-          'Login',
+          context.localization.login,
           style: GoogleFonts.leagueSpartan(
             textStyle: context.titleLarge.copyWith(
               color: kWhite,
@@ -114,7 +115,10 @@ class _LoginFormState extends State<_LoginForm> {
         final bool canSubmit = state.isLoginValid;
 
         return <Widget>[
-              TitleText('Welcome', textAlign: TextAlign.start),
+              TitleText(
+                context.localization.welcome,
+                textAlign: TextAlign.start,
+              ),
               verticalSpaceSmall,
               DescriptionText(
                 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ',
@@ -124,10 +128,10 @@ class _LoginFormState extends State<_LoginForm> {
               /// Input Email
               TextInputField(
                 controller: _loginEmailCtrl,
-                title: 'Email',
-                hintText: 'Email',
+                title: context.localization.email,
+                hintText: context.localization.email,
                 inputType: TextInputType.emailAddress,
-                onChange: (String value) =>
+                onChanged: (String value) =>
                     context.read<LoginCubit>().emailChanged(value.trim()),
                 errorText: state.emailErrorText(context),
               ),
@@ -136,10 +140,10 @@ class _LoginFormState extends State<_LoginForm> {
               /// Input Password
               TextInputField(
                 controller: _loginPassCtrl,
-                title: 'Password',
-                hintText: 'Password',
+                title: context.localization.password,
+                hintText: context.localization.password,
                 obscureText: true,
-                onChange: (String value) =>
+                onChanged: (String value) =>
                     context.read<LoginCubit>().passwordChanged(value.trim()),
                 errorText: state.passwordErrorText(context),
               ),
@@ -147,7 +151,7 @@ class _LoginFormState extends State<_LoginForm> {
 
               /// Forgot Password
               AnimatedTextButton(
-                'Forgot Password',
+                context.localization.forgot_password,
                 onPressed: () {},
               ).addAlign(alignment: Alignment.centerRight),
               verticalSpaceEnormous,
@@ -155,9 +159,10 @@ class _LoginFormState extends State<_LoginForm> {
               /// Login Button
               AnimatedSlideButton(
                 width: context.screenWidth * 0.45,
-                title: 'Login',
+                title: context.localization.login,
                 hasIcon: false,
                 borderRadius: 50,
+                isLoading: state.isInProgress,
                 buttonColor: canSubmit ? kPrimaryOrange : kGrey500,
                 onPressed: canSubmit
                     ? context.read<LoginCubit>().loginWithEmail
@@ -166,21 +171,27 @@ class _LoginFormState extends State<_LoginForm> {
               verticalSpaceMedium,
 
               DescriptionText(
-                'or signup with',
+                context.localization.signup_with,
               ).addAlign(alignment: Alignment.center),
               verticalSpaceMedium,
 
               /// Google
               AnimatedIconButton(
                 imageName: kGoogleIcon,
-                onPressed: () {},
+                onPressed: context.read<LoginCubit>().loginWithGoogle,
               ).addAlign(alignment: Alignment.center),
               verticalSpaceMedium,
 
               /// Signup
               <Widget>[
-                DescriptionText("Don't have account? "),
-                AnimatedTextButton('Signup', textColor: kPrimaryOrange),
+                DescriptionText(context.localization.not_have_account),
+                horizontalSpaceTiny,
+                AnimatedTextButton(
+                  context.localization.signup,
+                  textColor: kPrimaryOrange,
+                  onPressed: () =>
+                      GoRouter.of(context).pushNamed(RouteName.signup),
+                ),
               ].addRow(mainAxisAlignment: MainAxisAlignment.center),
             ]
             .addColumn(

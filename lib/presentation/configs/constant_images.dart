@@ -9,6 +9,8 @@ const String kTransferDocumentIcon =
 const String kShowOffIcon = '$baseIconsPath/show_off.png';
 const String kShowOnIcon = '$baseIconsPath/show_on.png';
 const String kGoogleIcon = '$baseIconsPath/google.png';
+const String kBackIcon = '$baseIconsPath/back_icon.png';
+const String kLoadingLogo = '$baseIconsPath/loading_logo.png';
 
 /// ======= Images =======
 const String baseImagesPath = 'assets/images';

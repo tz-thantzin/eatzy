@@ -32,7 +32,7 @@ class UserModel extends Equatable {
   factory UserModel.fromFirebaseUser(dynamic firebaseUser) {
     return UserModel(
       uid: firebaseUser.uid,
-      email: firebaseUser.email,
+      email: firebaseUser.signupEmail,
       name: firebaseUser.displayName,
       photo: firebaseUser.photoURL,
       lastLogin: firebaseUser.metadata?.lastSignInTime,

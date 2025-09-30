@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:layout/layout.dart';
 
 import 'injection.dart';
+import 'l10n/app_localizations.dart';
 
 class EatzyApp extends StatefulWidget {
   const EatzyApp({super.key});
@@ -44,6 +45,9 @@ class _EatzyAppState extends State<EatzyApp> {
               child: child!,
             );
           },
+          locale: const Locale('en'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
           debugShowCheckedModeBanner: false,
           routerConfig: router,
         ),

@@ -48,8 +48,11 @@ class AuthDatasource {
   }
 
   Future<UserModel?> loginWithGoogle() async {
-    _googleSignIn.initialize(serverClientId: kServerClientId);
+    await _googleSignIn.initialize(serverClientId: kServerClientId);
+    await _googleSignIn.signOut();
+    await _googleSignIn.disconnect();
     final GoogleSignInAccount googleUser = await _googleSignIn.authenticate();
+
     final GoogleSignInAuthentication googleAuth = googleUser.authentication;
     final firebase_auth.OAuthCredential credential = firebase_auth
         .GoogleAuthProvider.credential(idToken: googleAuth.idToken);

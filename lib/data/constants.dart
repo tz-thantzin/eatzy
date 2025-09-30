@@ -1,5 +1,5 @@
 const String kServerClientId =
-    '881701622244-nd9im7s2efjdm8tdptio9906ontpvqh5.apps.googleusercontent.com';
+    '32691788961-tjc186u06kjbj8istsngbk8f04mjgsj7.apps.googleusercontent.com';
 
 class UserFields {
   static const String fullName = 'fullName';

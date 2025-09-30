@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:developer';
 
+import 'package:eatzy/presentation/view/loading_view.dart';
 import 'package:eatzy/presentation/view/login/login_page.dart';
 import 'package:eatzy/presentation/view/onboarding/onboarding_screen.dart';
 import 'package:flutter/material.dart';
@@ -7,6 +9,7 @@ import 'package:go_router/go_router.dart';
 
 import '../presentation/bloc/app/app_bloc.dart';
 import '../presentation/view/error_view.dart';
+import '../presentation/view/signup/signup_page.dart';
 
 class GoRouterRefreshStream extends ChangeNotifier {
   late final StreamSubscription<dynamic> _subscription;
@@ -41,7 +44,12 @@ GoRouter createAppRouter(AppBloc appBloc) {
           return RoutePaths.home;
 
         case AppStatus.unauthenticated:
-          return currentPath == RoutePaths.login ? null : RoutePaths.login;
+          if (currentPath == RoutePaths.login ||
+              currentPath == RoutePaths.signup) {
+            return null;
+          }
+          return RoutePaths.login;
+
         case AppStatus.authenticating:
           return currentPath == RoutePaths.loading ? null : RoutePaths.loading;
       }
@@ -53,12 +61,26 @@ GoRouter createAppRouter(AppBloc appBloc) {
         builder: (context, state) => const OnboardingScreen(),
       ),
       GoRoute(
+        path: RoutePaths.loading,
+        name: RouteName.loading,
+        builder: (context, state) => const LoadingView(),
+      ),
+      GoRoute(
         path: RoutePaths.login,
         name: RouteName.login,
         builder: (context, state) => const LoginPage(),
       ),
+      GoRoute(
+        path: RoutePaths.signup,
+        name: RouteName.signup,
+        builder: (context, state) => const SignupPage(),
+      ),
     ],
-    errorBuilder: (context, state) => const ErrorView(),
+    errorBuilder: (context, state) {
+      log('Routes:', error: state.error);
+      // This will show the exact error
+      return ErrorView();
+    },
   );
 }
 

@@ -1,3 +1,6 @@
+import 'dart:developer';
+
+import 'package:eatzy/utils/extensions/context_ex.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -55,6 +58,7 @@ class LoginCubit extends Cubit<LoginState> {
 
     try {
       final User? user = await _authUseCase.loginWithGoogle();
+      log('User $user');
       if (user == null) {
         // User canceled Google login
         emit(state.copyWith(status: LoginStatus.initial));
