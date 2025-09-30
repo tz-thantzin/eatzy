@@ -7,22 +7,22 @@ class User extends Equatable {
   final String uid;
   final String? email;
   final String? name;
-  final String? photo;
-  final Uint8List? imageBytes;
+  final String? photoURL;
+  final Uint8List? profilePic;
+  final String? phoneNumber;
   final DateTime? dob;
   final DateTime? lastLogin;
-  final String? gender;
   final bool isEmailVerified;
 
   const User({
     required this.uid,
     this.email,
     this.name,
-    this.photo,
-    this.imageBytes,
+    this.photoURL,
+    this.profilePic,
+    this.phoneNumber,
     this.dob,
     this.lastLogin,
-    this.gender,
     this.isEmailVerified = false,
   });
 
@@ -30,23 +30,22 @@ class User extends Equatable {
     String? uid,
     String? email,
     String? name,
-    String? photo,
-    Uint8List? imageBytes,
+    String? photoURL,
+    Uint8List? profilePic,
+    String? phoneNumber,
     DateTime? dob,
     DateTime? lastLogin,
-    String? gender,
     bool? isEmailVerified,
-    bool? isUserProfileExist,
   }) {
     return User(
       uid: uid ?? this.uid,
       email: email ?? this.email,
       name: name ?? this.name,
-      photo: photo ?? this.photo,
-      imageBytes: imageBytes ?? this.imageBytes,
+      photoURL: photoURL ?? this.photoURL,
+      profilePic: profilePic ?? this.profilePic,
+      phoneNumber: phoneNumber ?? this.phoneNumber,
       dob: dob ?? this.dob,
       lastLogin: lastLogin ?? this.lastLogin,
-      gender: gender ?? this.gender,
       isEmailVerified: isEmailVerified ?? this.isEmailVerified,
     );
   }
@@ -56,17 +55,17 @@ class User extends Equatable {
     uid,
     email,
     name,
-    photo,
-    imageBytes,
+    photoURL,
+    profilePic,
+    phoneNumber,
     dob,
     lastLogin,
-    gender,
     isEmailVerified,
   ];
 
   @override
   String toString() {
-    return 'User(uid: $uid, email: $email, name: $name, photo: $photo, imageBytes: ${imageBytes?.isNotEmpty},  dob: $dob , lastLogin: $lastLogin, gender: $gender, isEmailVerified: $isEmailVerified)';
+    return 'User(uid: $uid, email: $email, name: $name, photoURL: $photoURL, profilePic: ${profilePic?.isNotEmpty},  dob: $dob , phoneNumber: $phoneNumber , lastLogin: $lastLogin, isEmailVerified: $isEmailVerified)';
   }
 }
 

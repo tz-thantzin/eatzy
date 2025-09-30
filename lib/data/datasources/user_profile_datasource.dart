@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:developer';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -24,9 +23,10 @@ class UserProfileDatasource {
     required String uid,
     required String fullName,
     required String email,
-    required String? imagePath,
-    required DateTime? dob,
-    required String? gender,
+    required String phoneNumber,
+    DateTime? dob,
+    String? photoURL,
+    String? imagePath,
   }) async {
     String? base64Image;
     if (imagePath != null) {
@@ -50,14 +50,12 @@ class UserProfileDatasource {
       // Encode as Base64
       base64Image = base64Encode(compressedBytes);
 
-      // Optional: size check before sending to Firestore
       final double sizeKB = base64Image.length * 3 / 4 / 1024;
       if (sizeKB > 900) {
         throw Exception('storage_error_image_too_large');
       }
     }
 
-    log('base64Image $base64Image');
     final DocumentReference<Map<String, dynamic>> userRef = _firestore
         .collection('users')
         .doc(uid);
@@ -66,12 +64,13 @@ class UserProfileDatasource {
     await userRef.set(<String, dynamic>{
       UserFields.fullName: fullName,
       UserFields.email: email,
+      UserFields.photoURL: photoURL,
       UserFields.dob: dob?.toIso8601String(),
-      UserFields.gender: gender,
+      UserFields.phoneNumber: phoneNumber,
       UserFields.updatedAt: FieldValue.serverTimestamp(),
       UserFields.lastLogin: FieldValue.serverTimestamp(),
       if (isNewUser) UserFields.createdAt: FieldValue.serverTimestamp(),
-      if (base64Image != null) UserFields.imageBase64: base64Image,
+      if (base64Image != null) UserFields.profilePic: base64Image,
     }, SetOptions(merge: true));
   }
 
@@ -99,8 +98,8 @@ class UserProfileDatasource {
     }, SetOptions(merge: true));
 
     final Map<String, dynamic> data = snapshot.data() ?? <String, dynamic>{};
-    final String? base64Image = data[UserFields.imageBase64] is String
-        ? data[UserFields.imageBase64] as String
+    final String? base64Image = data[UserFields.profilePic] is String
+        ? data[UserFields.profilePic] as String
         : null;
 
     return UserModel(
@@ -110,8 +109,9 @@ class UserProfileDatasource {
       dob: data[UserFields.dob] != null
           ? DateTime.tryParse(data[UserFields.dob])
           : null,
-      gender: data[UserFields.gender],
-      imageBytes: base64Image != null ? base64Decode(base64Image) : null,
+      photoURL: data[UserFields.photoURL],
+      profilePic: base64Image != null ? base64Decode(base64Image) : null,
+      phoneNumber: data[UserFields.phoneNumber],
       lastLogin: currentUser?.metadata.lastSignInTime,
       isEmailVerified: currentUser?.emailVerified ?? false,
     );

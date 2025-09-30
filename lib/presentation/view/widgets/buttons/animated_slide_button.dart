@@ -61,6 +61,7 @@ class _AnimatedSlideButtonState extends State<AnimatedSlideButton>
   @override
   void initState() {
     super.initState();
+
     _controller = AnimationController(vsync: this, duration: widget.duration);
     _textAndIconColor = ColorTween(
       begin: widget.onHoverColor,
@@ -114,10 +115,15 @@ class _AnimatedSlideButtonState extends State<AnimatedSlideButton>
                   children: [
                     animatedBackground(),
                     Center(
-                      child: Text(
-                        widget.title,
-                        style: widget.titleStyle ?? style,
-                      ),
+                      child: widget.isLoading
+                          ? SpinKitWanderingCubes(
+                              color: _textAndIconColor.value,
+                              size: context.autoAdaptive(s25),
+                            )
+                          : Text(
+                              widget.title,
+                              style: widget.titleStyle ?? style,
+                            ),
                     ),
                   ],
                 ),
@@ -170,7 +176,7 @@ class _AnimatedSlideButtonState extends State<AnimatedSlideButton>
             child: widget.isLoading
                 ? SpinKitWanderingCubes(
                     color: _textAndIconColor.value,
-                    size: 16.0,
+                    size: context.autoAdaptive(s25),
                   )
                 : Icon(
                     widget.iconData,

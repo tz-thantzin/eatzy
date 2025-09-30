@@ -5,9 +5,10 @@ abstract class UserProfileRepository {
     required String uid,
     required String fullName,
     required String email,
-    required String? imagePath,
-    required DateTime? dob,
-    required String? gender,
+    required String phoneNumber,
+    DateTime? dob,
+    String? photoURL, // from google sign in
+    String? profilePic, // user upload profile pic
   });
 
   Future<User> getUserProfile({required String uid, required String email});

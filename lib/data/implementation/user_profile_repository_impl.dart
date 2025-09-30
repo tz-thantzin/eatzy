@@ -17,18 +17,20 @@ class UserProfileRepositoryImpl implements UserProfileRepository {
     required String uid,
     required String fullName,
     required String email,
-    required String? imagePath,
-    required DateTime? dob,
-    required String? gender,
+    required String phoneNumber,
+    DateTime? dob,
+    String? photoURL,
+    String? profilePic,
   }) async {
     try {
       await _datasource.saveUserProfile(
         uid: uid,
         fullName: fullName,
         email: email,
-        imagePath: imagePath,
+        photoURL: photoURL,
+        imagePath: profilePic,
+        phoneNumber: phoneNumber,
         dob: dob,
-        gender: gender,
       );
     } on firebase_core.FirebaseException catch (e, stacktrace) {
       log('Unknown Error saveUserProfile', error: e, stackTrace: stacktrace);

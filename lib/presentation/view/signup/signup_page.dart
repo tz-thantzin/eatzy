@@ -1,8 +1,6 @@
 import 'package:country_code_picker/country_code_picker.dart';
 import 'package:eatzy/presentation/bloc/signup/signup_cubit.dart';
 import 'package:eatzy/presentation/configs/configs.dart';
-import 'package:eatzy/presentation/view/widgets/buttons/icon_button.dart';
-import 'package:eatzy/presentation/view/widgets/phone_number_input_field.dart';
 import 'package:eatzy/presentation/view/widgets/widgets.dart';
 import 'package:eatzy/utils/extensions/extensions.dart';
 import 'package:eatzy/utils/utils.dart';
@@ -38,6 +36,7 @@ class SignupView extends StatelessWidget {
         type: SnackBarType.warning,
         message: context.localization.email_not_verified,
       );
+      context.pop();
     }
     // Failure case
     else if (state.status == SignupStatus.failure) {
@@ -121,6 +120,32 @@ class _SignupFormState extends State<_SignupForm> {
   final TextEditingController _signupConfirmPassCtrl = TextEditingController();
   final TextEditingController _phoneNumberCtrl = TextEditingController();
   final TextEditingController _dobCtrl = TextEditingController();
+  //
+  // @override
+  // void initState() {
+  //   super.initState();
+  //
+  //   _fullNameCtrl.text = 'Test';
+  //   _signupEmailCtrl.text = 'abc@example.test.com';
+  //   _signupPassCtrl.text = 'Bbb111!!!';
+  //   _signupConfirmPassCtrl.text = 'Bbb111!!!';
+  //   _phoneNumberCtrl.text = '123456789';
+  //   _dobCtrl.text = Utils.instance.formatDateToDDMMYYYY(
+  //     DateTime.now().subtract(const Duration(days: 365 * 14)),
+  //   );
+  //
+  //   WidgetsBinding.instance.addPostFrameCallback((_) {
+  //     final signupCubit = context.read<SignupCubit>();
+  //     signupCubit.fullNameChanged(_fullNameCtrl.text);
+  //     signupCubit.emailChanged(_signupEmailCtrl.text);
+  //     signupCubit.passwordChanged(_signupPassCtrl.text);
+  //     signupCubit.confirmPasswordChanged(_signupConfirmPassCtrl.text);
+  //     signupCubit.phoneNumberChanged(_phoneNumberCtrl.text);
+  //     signupCubit.dobChanged(
+  //       DateTime.now().subtract(const Duration(days: 365 * 14)),
+  //     );
+  //   });
+  // }
 
   Future<void> _pickDate(BuildContext context) async {
     final now = DateTime.now();
@@ -142,7 +167,6 @@ class _SignupFormState extends State<_SignupForm> {
     return BlocBuilder<SignupCubit, SignupState>(
       builder: (_, SignupState state) {
         final bool canSubmit = state.isSignupValid;
-
         return <Widget>[
               TextInputField(
                 controller: _fullNameCtrl,
@@ -242,10 +266,10 @@ class _SignupFormState extends State<_SignupForm> {
                 title: context.localization.signup,
                 hasIcon: false,
                 borderRadius: 50,
-                isLoading: state.isInProgress,
+                isLoading: state.isSignupEmailInProgress,
                 buttonColor: canSubmit ? kPrimaryOrange : kGrey500,
                 onPressed: canSubmit
-                    ? context.read<SignupCubit>().loginWithEmail
+                    ? context.read<SignupCubit>().signupWithEmail
                     : null,
               ).addAlign(alignment: Alignment.center),
               verticalSpaceMedium,
@@ -258,6 +282,7 @@ class _SignupFormState extends State<_SignupForm> {
               /// Google
               AnimatedIconButton(
                 imageName: kGoogleIcon,
+                isLoading: state.isSignupGoogleInProgress,
                 onPressed: context.read<SignupCubit>().signupWithGoogle,
               ).addAlign(alignment: Alignment.center),
               verticalSpaceMedium,

@@ -4,10 +4,12 @@ const String kServerClientId =
 class UserFields {
   static const String fullName = 'fullName';
   static const String email = 'email';
+  static const String photoURL = 'photoURL';
+  static const String profilePic = 'profilePic';
+  static const String phoneNumber = 'phoneNumber';
   static const String dob = 'dob';
-  static const String gender = 'gender';
   static const String updatedAt = 'updatedAt';
   static const String createdAt = 'createdAt';
-  static const String imageBase64 = 'imageBase64';
   static const String lastLogin = 'lastLogin';
+  static const String isEmailVerified ='isEmailVerified';
 }

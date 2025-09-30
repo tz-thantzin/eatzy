@@ -1,5 +1,4 @@
 import 'package:eatzy/presentation/configs/configs.dart';
-import 'package:eatzy/presentation/view/widgets/buttons/icon_button.dart';
 import 'package:eatzy/presentation/view/widgets/widgets.dart';
 import 'package:eatzy/utils/extensions/extensions.dart';
 import 'package:flutter/material.dart';
@@ -162,7 +161,7 @@ class _LoginFormState extends State<_LoginForm> {
                 title: context.localization.login,
                 hasIcon: false,
                 borderRadius: 50,
-                isLoading: state.isInProgress,
+                isLoading: state.isLoginEmailInProgress,
                 buttonColor: canSubmit ? kPrimaryOrange : kGrey500,
                 onPressed: canSubmit
                     ? context.read<LoginCubit>().loginWithEmail
@@ -178,6 +177,7 @@ class _LoginFormState extends State<_LoginForm> {
               /// Google
               AnimatedIconButton(
                 imageName: kGoogleIcon,
+                isLoading: state.isLoginGoogleInProgress,
                 onPressed: context.read<LoginCubit>().loginWithGoogle,
               ).addAlign(alignment: Alignment.center),
               verticalSpaceMedium,

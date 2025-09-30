@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:eatzy/domain/usecases/shared_preference_usecase.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -30,7 +28,6 @@ class AppBloc extends Bloc<AppEvent, AppState> {
     UserSubscriptionRequested event,
     Emitter<AppState> emit,
   ) {
-    log('authenticating');
     emit(state.authenticating());
 
     return emit.onEach(
@@ -38,7 +35,6 @@ class AppBloc extends Bloc<AppEvent, AppState> {
       onData: (User? user) async {
         final isOnboardingCompleted = await _sharedPreferenceUseCase
             .isOnboardingCompleted();
-        log('User ${user}');
         if (user == null) {
           // User not logged in → isOnboardingCompleted -> ? unauthenticated : firstLaunch
           return emit(
@@ -71,7 +67,6 @@ class AppBloc extends Bloc<AppEvent, AppState> {
     OnboardingCompleted event,
     Emitter<AppState> emit,
   ) async {
-    print("_onboardingCompleted");
     await _sharedPreferenceUseCase.setOnboardingCompleted(true);
     emit(AppState._(status: AppStatus.unauthenticated));
   }
@@ -90,7 +85,7 @@ class AppBloc extends Bloc<AppEvent, AppState> {
       );
     }
 
-    emit(AppState(user: userProfile?.copyWith(isUserProfileExist: true)));
+    emit(AppState(user: userProfile));
   }
 
   Future<void> _onLogoutPressed(

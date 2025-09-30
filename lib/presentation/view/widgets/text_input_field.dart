@@ -1,5 +1,5 @@
 import 'package:eatzy/presentation/configs/constant_images.dart';
-import 'package:eatzy/presentation/view/widgets/text/title_text.dart';
+import 'package:eatzy/presentation/view/widgets/widgets.dart';
 import 'package:eatzy/utils/extensions/extensions.dart';
 import 'package:flutter/material.dart';
 
@@ -74,9 +74,7 @@ class _TextInputFieldState extends State<TextInputField> {
         onChanged: widget.onChanged,
         onFieldSubmitted: widget.onFieldSubmitted,
         onEditingComplete: widget.onEditingComplete,
-        style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-          color: widget.readOnly ? kBlack : kGrey500,
-        ),
+        style: Theme.of(context).textTheme.bodyLarge!.copyWith(color: kBlack),
         decoration: InputDecoration(
           hintText: widget.hintText,
           hintStyle: Theme.of(

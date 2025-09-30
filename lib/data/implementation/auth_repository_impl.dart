@@ -75,9 +75,19 @@ class AuthRepositoryImpl implements AuthRepository {
         throw const SignUpWithEmailAndPasswordFailure();
       }
       return user.toEntity();
-    } on firebase_auth.FirebaseAuthException catch (e) {
+    } on firebase_auth.FirebaseAuthException catch (e, st) {
+      log(
+        'AuthRepositoryImpl:: signupWithEmail failed',
+        error: e,
+        stackTrace: st,
+      );
       throw SignUpWithEmailAndPasswordFailure.fromCode(e.code);
-    } catch (_) {
+    } catch (e, st) {
+      log(
+        'AuthRepositoryImpl:: signupWithEmail failed',
+        error: e,
+        stackTrace: st,
+      );
       throw const SignUpWithEmailAndPasswordFailure();
     }
   }

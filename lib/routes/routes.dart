@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:developer';
 
+import 'package:eatzy/presentation/view/home/home_page.dart';
 import 'package:eatzy/presentation/view/loading_view.dart';
 import 'package:eatzy/presentation/view/login/login_page.dart';
 import 'package:eatzy/presentation/view/onboarding/onboarding_screen.dart';
@@ -74,6 +75,11 @@ GoRouter createAppRouter(AppBloc appBloc) {
         path: RoutePaths.signup,
         name: RouteName.signup,
         builder: (context, state) => const SignupPage(),
+      ),
+      GoRoute(
+        path: RoutePaths.home,
+        name: RouteName.home,
+        builder: (context, state) => const HomePage(),
       ),
     ],
     errorBuilder: (context, state) {

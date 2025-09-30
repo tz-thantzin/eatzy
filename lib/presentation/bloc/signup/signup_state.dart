@@ -20,7 +20,7 @@ class SignupState extends Equatable {
   final ConfirmPasswordInput signupConfirmPassword;
   final PhoneNumberInput phoneNumber;
   final DobInput dob;
-  final String? countryCode;
+  final String countryCode;
 
   final String? errorMessage;
 

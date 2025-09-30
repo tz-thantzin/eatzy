@@ -1,6 +1,7 @@
 import 'dart:developer';
 
-import 'package:eatzy/utils/extensions/context_ex.dart';
+import 'package:eatzy/domain/usecases/user_usecase.dart';
+import 'package:eatzy/utils/extensions/extensions.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -15,10 +16,14 @@ part 'signup_state.dart';
 
 class SignupCubit extends Cubit<SignupState> {
   final AuthUseCase _authUseCase;
+  final UserUseCase _userUseCase;
 
-  SignupCubit({required AuthUseCase authUseCase})
-    : _authUseCase = authUseCase,
-      super(SignupState());
+  SignupCubit({
+    required AuthUseCase authUseCase,
+    required UserUseCase userUseCase,
+  }) : _authUseCase = authUseCase,
+       _userUseCase = userUseCase,
+       super(SignupState());
 
   void fullNameChanged(String fullName) =>
       emit(state.fullNameChanged(fullName));
@@ -39,10 +44,10 @@ class SignupCubit extends Cubit<SignupState> {
 
   void dobChanged(DateTime dob) => emit(state.dobChanged(dob));
 
-  Future<void> loginWithEmail() async {
+  Future<void> signupWithEmail() async {
     emit(state.copyWith(status: SignupStatus.signupEmailInProgress));
     try {
-      final User? user = await _authUseCase.loginWithEmail(
+      final User? user = await _authUseCase.signupWithEmail(
         email: state.signupEmail.value,
         password: state.signupPassword.value,
       );
@@ -50,9 +55,22 @@ class SignupCubit extends Cubit<SignupState> {
       if (user == null) {
         emit(state.copyWith(status: SignupStatus.initial));
       } else {
-        final User userProfile = await _authUseCase.getUserProfile(
+        String phoneNumber = '${state.countryCode}-${state.phoneNumber.value}';
+        await _userUseCase.saveUserProfile(
           uid: user.uid,
-          email: user.email!,
+          fullName: state.fullName.value,
+          email: state.signupEmail.value,
+          dob: state.dob.value!,
+          phoneNumber: phoneNumber,
+          photoURL: user.photoURL,
+        );
+        User? userProfile = user.copyWith(
+          uid: user.uid,
+          name: state.fullName.value,
+          email: state.signupEmail.value,
+          dob: state.dob.value!,
+          phoneNumber: phoneNumber,
+          photoURL: user.photoURL,
         );
         emit(state.copyWith(status: SignupStatus.success, user: userProfile));
       }

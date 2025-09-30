@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:eatzy/domain/usecases/user_usecase.dart';
 import 'package:eatzy/presentation/bloc/app/app_bloc.dart';
 import 'package:eatzy/presentation/bloc/login/login_cubit.dart';
 import 'package:eatzy/presentation/bloc/signup/signup_cubit.dart';
@@ -22,7 +23,9 @@ import 'domain/usecases/shared_preference_usecase.dart';
 final getIt = GetIt.instance;
 
 Future<void> setupDependencies() async {
-  // Initialize shared preference datasource asynchronously
+  ///  ========================================
+  ///  Shared Preferences
+  ///  ========================================
   final sharedPreference = await SharedPreferences.getInstance();
   final sharedPrefsDatasource = await SharedPreferenceDatasource.init(
     sharedPreference,
@@ -38,7 +41,9 @@ Future<void> setupDependencies() async {
     SharedPreferenceUseCase(getIt<SharedPreferenceRepository>()),
   );
 
-  // Data sources
+  ///  ========================================
+  ///  Data sources
+  ///  ========================================
   getIt.registerLazySingleton<AuthDatasource>(
     () => AuthDatasource(
       firebaseAuth: FirebaseAuth.instance,
@@ -53,7 +58,9 @@ Future<void> setupDependencies() async {
     ),
   );
 
-  // Repositories
+  ///  ========================================
+  ///  Repositories
+  ///  ========================================
   getIt.registerLazySingleton<AuthRepository>(
     () => AuthRepositoryImpl(getIt<AuthDatasource>()),
   );
@@ -62,7 +69,9 @@ Future<void> setupDependencies() async {
     () => UserProfileRepositoryImpl(getIt<UserProfileDatasource>()),
   );
 
-  // Use Cases
+  ///  ========================================
+  ///  Use Cases
+  ///  ========================================
   getIt.registerLazySingleton<AuthUseCase>(
     () => AuthUseCase(
       authRepository: getIt<AuthRepository>(),
@@ -70,20 +79,29 @@ Future<void> setupDependencies() async {
     ),
   );
 
-  // Cubit
-  getIt.registerFactory<LoginCubit>(
-    () => LoginCubit(authUseCase: getIt<AuthUseCase>()),
+  getIt.registerLazySingleton<UserUseCase>(
+    () => UserUseCase(getIt<UserProfileRepository>()),
   );
 
-  getIt.registerFactory<SignupCubit>(
-    () => SignupCubit(authUseCase: getIt<AuthUseCase>()),
-  );
+  ///  ========================================
+  ///  Bloc
+  ///  ========================================
 
-  // Bloc
   getIt.registerFactory<AppBloc>(
     () => AppBloc(
       authUseCase: getIt<AuthUseCase>(),
       sharePreferenceUseCase: getIt<SharedPreferenceUseCase>(),
     )..add(UserSubscriptionRequested()),
+  );
+
+  getIt.registerFactory<LoginCubit>(
+    () => LoginCubit(authUseCase: getIt<AuthUseCase>()),
+  );
+
+  getIt.registerFactory<SignupCubit>(
+    () => SignupCubit(
+      authUseCase: getIt<AuthUseCase>(),
+      userUseCase: getIt<UserUseCase>(),
+    ),
   );
 }
